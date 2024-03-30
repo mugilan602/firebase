@@ -1,145 +1,342 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Table to Database</title>
-  <style>
-    table {
-      border-collapse: collapse;
-      width: 50%;
-      margin: 20px;
-    }
-
-    table, th, td {
-      border: 1px solid black;
-    }
-
-    th, td {
-      padding: 10px;
-      text-align: left;
-    }
-  </style>
-</head>
-<body>
-
-  <h2>Table to Database</h2>
-
-  <table border="1" id="myTable">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>1</td>
-        <td>Mugilan</td>
-        <td><input type="radio" name="status_1" value="On" data-checked="false" onclick="toggleRadio(this)"></td>
-      </tr>
-      <tr>
-        <td>2</td>
-        <td>Nirainjan</td>
-        <td><input type="radio" name="status_2" value="On" data-checked="false" onclick="toggleRadio(this)"></td>
-      </tr>
-      <tr>
-        <td>3</td>
-        <td>Muthu</td>
-        <td><input type="radio" name="status_3" value="On" data-checked="false" onclick="toggleRadio(this)"></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <button id="saveToDatabase">Submit</button>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCUKV9kQmnSBRiFduML9tKmnTVdGp6UJhY",
-      authDomain: "class-f8223.firebaseapp.com",
-      projectId: "class-f8223",
-      storageBucket: "class-f8223.appspot.com",
-      messagingSenderId: "301682284539",
-      appId: "1:301682284539:web:0e308c56cc4bd997b35d5e"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    window.toggleRadio = function (radio) {
-      const isChecked = radio.getAttribute("data-checked") === "true";
-      radio.checked = !isChecked;
-      radio.setAttribute("data-checked", (!isChecked).toString());
-    };
-
-    function fetchAndSetInitialState() {
-      const table = document.getElementById("myTable");
-      const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
-
-      // Fetch data from the database
-      onValue(ref(database), (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          for (let i = 0; i < rows.length; i++) {
-            const columns = rows[i].getElementsByTagName("td");
-            const name = columns[1].textContent;
-
-            // Find the corresponding data in the fetched data
-            const userData = data[name];
-
-            if (userData) {
-              const radio = rows[i].querySelector(`input[name="status_${i + 1}"]`);
-              if (userData.status === "On") {
-                radio.checked = true;
-                radio.setAttribute("data-checked", "true");
-              } else {
-                radio.checked = false;
-                radio.setAttribute("data-checked", "false");
-              }
-            }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSE B</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
         }
-      });
-    }
 
-    function saveToDatabase() {
-      const table = document.getElementById("myTable");
-      const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+        .container {
+            display: grid;
+            grid-template-columns: 50% 50%;
+        }
 
-      for (let i = 0; i < rows.length; i++) {
-        const columns = rows[i].getElementsByTagName("td");
-        const name = columns[1].textContent;
-        const rollNumber = columns[0].textContent;
-        const radio = rows[i].querySelector(`input[name="status_${i + 1}"]`);
+        table {
+            border-collapse: collapse;
+            margin: 20px;
+            display: none;
+        }
 
-        // Check if a radio button is selected
-        const status = radio && radio.checked ? "On" : "Off";
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
 
-        // Create an object with the data
-        const newData = {
-          rollNumber: rollNumber,
-          status: status
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        #loadingIndicator {
+            display: block;
+            margin: 20px;
+            text-align: center;
+        }
+
+        #myTable {
+            display: none;
+        }
+
+        #saveToDatabase {
+            margin: auto;
+            display: none;
+        }
+
+        #cseHeading {
+            display: none;
+            text-align: center;
+        }
+
+        .checked {
+            background-color: green;
+        }
+
+        .buttonClass {
+            font-size: 15px;
+            font-family: Arial;
+            width: 140px;
+            height: 50px;
+            border-width: 1px;
+            color: #fff;
+            border-color: rgba(15, 20, 16, 1);
+            border-top-left-radius: 28px;
+            border-top-right-radius: 28px;
+            border-bottom-left-radius: 28px;
+            border-bottom-right-radius: 28px;
+            text-shadow: 1px 1px 0px rgba(24, 34, 22, 1);
+            background: rgba(5, 5, 5, 1);
+        }
+
+        .buttonClass:hover {
+            background: rgba(44, 41, 41, 1)
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container {
+                display: block;
+            }
+
+            table {
+                border-collapse: collapse;
+                margin: 20px;
+                display: none;
+                width: 95%;
+            }
+
+           /* table,
+            th,
+            td {
+                border: 1px solid black;
+            }
+
+            th,
+            td {
+                padding: 10px;
+                text-align: left;
+            }*/
+
+            table#table1 {
+                margin-bottom: 0;
+            }
+
+            table#table2 {
+                margin-top: 0;
+            }
+
+            #table2 thead {
+                display: none;
+            }
+            #table2 td input{
+               margin-right: 27px; 
+            }
+            #table2 td{
+                padding-right: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loadingIndicator"><img src="200w.gif" alt="Loading..."></div>
+
+    <h1 id="cseHeading">CSE B</h1>
+
+    <div class="container">
+        <table border="1" id="table1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody1">
+                <!-- Table rows will be generated dynamically here -->
+            </tbody>
+        </table>
+
+        <table border="1" id="table2">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody2">
+                <!-- Table rows will be generated dynamically here -->
+            </tbody>
+        </table>
+    </div>
+
+    <button id="saveToDatabase" class="buttonClass">Submit</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCUKV9kQmnSBRiFduML9tKmnTVdGp6UJhY",
+            authDomain: "class-f8223.firebaseapp.com",
+            projectId: "class-f8223",
+            storageBucket: "class-f8223.appspot.com",
+            messagingSenderId: "301682284539",
+            appId: "1:301682284539:web:0e308c56cc4bd997b35d5e"
         };
 
-        // Set the data at the specified key
-        set(ref(database, name), newData).then(() => {
-          console.log(`Data for ${name} saved successfully`);
-        }).catch((error) => {
-          console.error(`Error saving data for ${name}:`, error);
-        });
-      }
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-      alert("Successfully submitted");
-    }
+        window.toggleRadio = function (radio) {
+            const isChecked = radio.getAttribute("data-checked") === "true";
+            radio.checked = !isChecked;
+            radio.setAttribute("data-checked", (!isChecked).toString());
+        };
 
-    // Fetch and set the initial state on page load
-    fetchAndSetInitialState();
+        const names = ['AARTHI M', 'DEVA DHARSHINI S', 'DHANALAKSHMI Y', 'DHANAVIDHYA B', 'DHIVYA SHREE S', 'DIVYA DARSSHINI S', 'DIVYADHARSHNI R', 'DURGA T', 'ILAMPIRAI M', 'JANANI SINDHU P', 'JAYA PRIYA G', 'KAVIYA S', 'KAVIYASELVI V', 'LOGAVARSHINI P', 'NESIKA S', 'PREETHI K', 'RESHMA V', 'RESHMAA S', 'ROSHINI R', 'RUBASRI T', 'SREE VARSHINI  B', 'SREENITHI R', 'TAMILSELVI K', 'TANUSHRI V', 'VANDANA PRASAD', 'VARSHINI K', 'VIDHYA VARSHINI R', 'AJAY RAHUL R', 'ARUN MURUGAN S K', 'ARUNKUMAR R', 'DARAMONI HARISH', 'DEEPAK KISHORE D', 'ELAIYAVANAN A', 'GOPALA KRISHNAN E', 'GURU PRASAT M R', 'HARINARAYANAN A', 'HEMAAN KUMARAN S V', 'LAKSHMI NARAYANAN S', 'MADHAN S', 'MUGILAN A', 'MUTHUVANAN S', 'NIRAINJAN C', 'NITHISH K', 'PARTHASARATHI C', 'PRAVEEN T', 'PREM VIGNESH K', 'RADHAKRISHNAN M', 'RAHUL V', 'RISHIKUMAR S S', 'ROHITH J', 'SANJAI V', 'SANJAY S', 'SANTHOSH S', 'SATHISHWARAN S', 'SELVAMANIKANDAN S', 'SURYA NARAYANAN R', 'TRILOK K', 'VARATHARAJAN R', 'VIKASH P', 'VIMAL L', 'SIDHARRTH M V', 'GOKULA KRISHNAA S', 'RAVI BHARATHI K'];
 
-    document.getElementById("saveToDatabase").addEventListener("click", saveToDatabase);
-  </script>
+        function fetchAndSetInitialState() {
+            document.getElementById("loadingIndicator").style.display = "block"; // Display loading indicator
+
+            const table1 = document.getElementById("table1");
+            const tbody1 = document.getElementById("tableBody1");
+
+            const table2 = document.getElementById("table2");
+            const tbody2 = document.getElementById("tableBody2");
+
+            // Generate table rows dynamically for first column (rows 1 to 31)
+            for (let i = 0; i < 31; i++) {
+                const tr = document.createElement("tr");
+                const tdId = document.createElement("td");
+                const tdName = document.createElement("td");
+                const tdStatus = document.createElement("td");
+                const inputStatus = document.createElement("input");
+
+                tdId.textContent = i + 1; // Set ID
+                tdName.textContent = names[i]; // Set name
+                inputStatus.type = "radio";
+                inputStatus.name = `status_${i + 1}`;
+                inputStatus.value = "On";
+                inputStatus.setAttribute("data-checked", "false");
+                inputStatus.onclick = function () {
+                    toggleRadio(this);
+                };
+
+                tdStatus.appendChild(inputStatus);
+
+                tr.appendChild(tdId);
+                tr.appendChild(tdName);
+                tr.appendChild(tdStatus);
+
+                tbody1.appendChild(tr);
+            }
+
+            // Generate table rows dynamically for second column (rows 32 to 63)
+            for (let i = 31; i < 63; i++) {
+                const tr = document.createElement("tr");
+                const tdId = document.createElement("td");
+                const tdName = document.createElement("td");
+                const tdStatus = document.createElement("td");
+                const inputStatus = document.createElement("input");
+
+                tdId.textContent = i + 1; // Set ID
+                tdName.textContent = names[i]; // Set name
+                inputStatus.type = "radio";
+                inputStatus.name = `status_${i + 1}`;
+                inputStatus.value = "On";
+                inputStatus.setAttribute("data-checked", "false");
+                inputStatus.onclick = function () {
+                    toggleRadio(this);
+                };
+
+                tdStatus.appendChild(inputStatus);
+
+                tr.appendChild(tdId);
+                tr.appendChild(tdName);
+                tr.appendChild(tdStatus);
+
+                tbody2.appendChild(tr);
+            }
+
+            // Fetch data from the database
+            onValue(ref(database), (snapshot) => {
+                document.getElementById("loadingIndicator").style.display = "none"; // Hide loading indicator
+                document.getElementById("cseHeading").style.display = "block"; // Show CSE B heading
+                table1.style.display = "table"; // Show table1
+                table2.style.display = "table"; // Show table2
+                document.getElementById("saveToDatabase").style.display = "block"; // Show submit button
+
+                const data = snapshot.val();
+                if (data) {
+                    names.forEach((name, index) => {
+                        const userData = data[name];
+                        if (userData) {
+                            const radio = document.querySelector(`input[name="status_${index + 1}"]`);
+                            if (userData.status === "On") {
+                                radio.checked = true;
+                                radio.setAttribute("data-checked", "true");
+                                radio.parentNode.parentNode.classList.add("checked");
+                            } else {
+                                radio.checked = false;
+                                radio.setAttribute("data-checked", "false");
+                                radio.parentNode.parentNode.classList.add("unchecked");
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        function saveToDatabase() {
+            const table1 = document.getElementById("table1");
+            const tbody1 = document.getElementById("tableBody1");
+            const rows1 = tbody1.getElementsByTagName("tr");
+
+            for (let i = 0; i < rows1.length; i++) {
+                const columns = rows1[i].getElementsByTagName("td");
+                const name = columns[1].textContent;
+                const rollNumber = columns[0].textContent;
+                const radio = rows1[i].querySelector(`input[name="status_${i + 1}"]`);
+
+                // Check if a radio button is selected
+                const status = radio && radio.checked ? "On" : "Off";
+
+                // Create an object with the data
+                const newData = {
+                    rollNumber: rollNumber,
+                    status: status
+                };
+
+                // Set the data at the specified key
+                set(ref(database, name), newData).then(() => {
+                    console.log(`Data for ${name} saved successfully`);
+                }).catch((error) => {
+                    console.error(`Error saving data for ${name}:`, error);
+                });
+            }
+
+            const table2 = document.getElementById("table2");
+            const tbody2 = document.getElementById("tableBody2");
+            const rows2 = tbody2.getElementsByTagName("tr");
+
+            for (let i = 0; i < rows2.length; i++) {
+                const columns = rows2[i].getElementsByTagName("td");
+                const name = columns[1].textContent;
+                const rollNumber = columns[0].textContent;
+                const radio = rows2[i].querySelector(`input[name="status_${i + 32}"]`);
+
+                // Check if a radio button is selected
+                const status = radio && radio.checked ? "On" : "Off";
+
+                // Create an object with the data
+                const newData = {
+                    rollNumber: rollNumber,
+                    status: status
+                };
+
+                // Set the data at the specified key
+                set(ref(database, name), newData).then(() => {
+                    console.log(`Data for ${name} saved successfully`);
+                }).catch((error) => {
+                    console.error(`Error saving data for ${name}:`, error);
+                });
+            }
+
+            alert("Successfully submitted");
+        }
+
+        // Fetch and set the initial state on page load
+        fetchAndSetInitialState();
+
+        document.getElementById("saveToDatabase").addEventListener("click", saveToDatabase);
+    </script>
 </body>
+
 </html>
