@@ -7,57 +7,64 @@
     <title>CSE B</title>
     <style>
         body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
         }
-
+    
         .container {
             display: grid;
             grid-template-columns: 50% 50%;
         }
-
+    
         table {
             border-collapse: collapse;
             margin: 20px;
             display: none;
         }
-
+    
         table,
         th,
         td {
             border: 1px solid black;
         }
-
+    
         th,
         td {
             padding: 10px;
             text-align: left;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Change font for a neater appearance */
         }
-
+    
+        th {
+            background-color: #f2f2f2; /* Light color for table heading */
+        }
+    
         #loadingIndicator {
             display: block;
             margin: 20px;
             text-align: center;
         }
-
+    
         #myTable {
             display: none;
         }
-
+    
         #saveToDatabase {
             margin: auto;
             display: none;
         }
-
+    
         #cseHeading {
             display: none;
             text-align: center;
         }
-
+    
         .checked {
             background-color: green;
         }
-
+    
         .buttonClass {
             font-size: 15px;
             font-family: Arial;
@@ -73,54 +80,59 @@
             text-shadow: 1px 1px 0px rgba(24, 34, 22, 1);
             background: rgba(5, 5, 5, 1);
         }
-
+    
         .buttonClass:hover {
             background: rgba(44, 41, 41, 1)
         }
-
+    
         @media only screen and (max-width: 600px) {
             .container {
                 display: block;
             }
-
+    
             table {
                 border-collapse: collapse;
                 margin: 20px;
                 display: none;
                 width: 95%;
             }
-
-           /* table,
+    
+            /* table,
             th,
             td {
                 border: 1px solid black;
             }
-
+    
             th,
             td {
                 padding: 10px;
                 text-align: left;
             }*/
-
+    
             table#table1 {
+                margin-left: 12px;
                 margin-bottom: 0;
             }
-
+    
             table#table2 {
+                margin-left: 12px;
                 margin-top: 0;
             }
-
+    
             #table2 thead {
                 display: none;
             }
-            #table2 td input{
-               margin-right: 27px; 
+    
+            #table2 td input {
+                margin-right: 26px;
             }
-            #table2 td{
-                padding-right: 22px;
+    
+            #table2 td {
+                padding-right: 17px;
             }
         }
     </style>
+    
 </head>
 
 <body>
